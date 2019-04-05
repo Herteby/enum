@@ -262,30 +262,28 @@ fromIterator2 iterator start =
 
 
 iterate : (a -> ( b, a )) -> a -> List ( b, a )
-iterate iterator first =
+iterate iterator init =
     let
-        helper : a -> List ( b, a )
-        helper current =
+        helper : a -> List ( b, a ) -> List ( b, a )
+        helper prevValue stack =
             let
-                next =
-                    iterator current
+                item =
+                    iterator prevValue
+
+                value =
+                    Tuple.second item
             in
-            if Tuple.second next == first then
-                [ next ]
+            if value == init then
+                -- we get our starting value last, so we first reverse the list
+                -- we built, and then add the starting value to the front.
+                -- If the order is not actually important, we can also just
+                -- return `item :: stack` here
+                item :: List.reverse stack
 
             else
-                helper (Tuple.second next) ++ [ next ]
-
-        list =
-            helper first
-
-        head =
-            list |> List.head |> Maybe.map List.singleton |> Maybe.withDefault []
-
-        tail =
-            helper first |> List.drop 1 |> List.reverse
+                helper value (item :: stack)
     in
-    head ++ tail
+    helper init []
 
 
 iterate2 : (a -> a) -> a -> List a
