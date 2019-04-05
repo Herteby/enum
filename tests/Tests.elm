@@ -1,4 +1,4 @@
-module Tests exposing (suite, suite2)
+module Tests exposing (suite)
 
 import Dict
 import Enum exposing (Enum, EnumInt)
@@ -35,7 +35,7 @@ stringTuples =
 
 ints : List Int
 ints =
-    [ 0, 1, 2 ]
+    [ 1, 2, 3 ]
 
 
 intTuples : List ( Int, Fruit )
@@ -58,25 +58,13 @@ stringIterator fruit =
 intIterator fruit =
     case fruit of
         Mango ->
-            ( 0, Apple )
+            ( 1, Apple )
 
         Apple ->
-            ( 1, Banana )
+            ( 2, Banana )
 
         Banana ->
-            ( 2, Mango )
-
-
-iterator2 fruit =
-    case fruit of
-        Mango ->
-            Apple
-
-        Apple ->
-            Banana
-
-        Banana ->
-            Mango
+            ( 3, Mango )
 
 
 
@@ -107,7 +95,7 @@ intTests enum =
     , test "fromInt" <|
         \_ -> ints |> List.map enum.fromInt |> Expect.equal (List.map Just fruits)
     , test "decoder" <|
-        \_ -> """[0,1,2]""" |> decodeString (Decode.list enum.decoder) |> Expect.equal (Ok fruits)
+        \_ -> """[1,2,3]""" |> decodeString (Decode.list enum.decoder) |> Expect.equal (Ok fruits)
     , test "encode" <|
         \_ -> fruits |> Encode.list enum.encode |> decodeValue (Decode.list enum.decoder) |> Expect.equal (Ok fruits)
     , test "dict" <|
@@ -126,14 +114,6 @@ suite =
     describe "Enum"
         [ describe "create" <| stringTests <| Enum.create stringTuples
         , describe "fromIterator" <| stringTests <| Enum.fromIterator stringIterator Apple
-        ]
-
-
-suite2 : Test
-suite2 =
-    describe "EnumInt"
-        [ describe "createInt" <| intTests <| Enum.createInt intTuples
+        , describe "createInt" <| intTests <| Enum.createInt intTuples
         , describe "fromIntIterator" <| intTests <| Enum.fromIntIterator intIterator Apple
-        , describe "fromIndex" <| intTests <| Enum.fromIndex fruits
-        , describe "fromIterator2" <| intTests <| Enum.fromIterator2 iterator2 Apple
         ]

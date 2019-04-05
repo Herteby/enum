@@ -1,6 +1,6 @@
 module Enum exposing
     ( Enum, create, fromIterator
-    , EnumInt, createInt, fromIndex, fromIntIterator, fromIterator2
+    , EnumInt, createInt, fromIntIterator
     )
 
 {-|
@@ -209,58 +209,6 @@ fromIntIterator iterator start =
     createInt (iterate iterator start)
 
 
-{-| Create an `EnumInt` based on list index
-
-    type Fruit
-        = Apple
-        | Banana
-        | Mango
-
-    enum : EnumInt Fruit
-    enum =
-        Enum.fromIndex
-            [ Apple
-            , Banana
-            , Mango
-            ]
-
--}
-fromIndex : List a -> EnumInt a
-fromIndex =
-    List.indexedMap Tuple.pair >> createInt
-
-
-{-| Create an `EnumInt` from an iterator
-
-    type Fruit
-        = Apple
-        | Banana
-        | Mango
-
-    enum : EnumInt Fruit
-    enum =
-        Enum.fromIterator2
-            (\a ->
-                case a of
-                    Apple ->
-                        Banana
-
-                    Banana ->
-                        Mango
-
-                    Mango ->
-                        Apple
-            )
-            Apple
-
--}
-fromIterator2 : (a -> a) -> a -> EnumInt a
-fromIterator2 iterator start =
-    iterate2 iterator start
-        |> List.indexedMap Tuple.pair
-        |> createInt
-
-
 iterate : (a -> ( b, a )) -> a -> List ( b, a )
 iterate iterator init =
     let
@@ -284,17 +232,3 @@ iterate iterator init =
                 helper value (item :: stack)
     in
     helper init []
-
-
-iterate2 : (a -> a) -> a -> List a
-iterate2 iterator first =
-    let
-        helper : a -> List a
-        helper current =
-            if iterator current == first then
-                current :: []
-
-            else
-                current :: helper (iterator current)
-    in
-    helper first
