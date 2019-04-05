@@ -33,15 +33,15 @@ type alias Enum a =
     }
 
 
-{-| Create an `Enum` from a list of `String`s and variants
+{-| Create an `Enum` from a list of `String` and variants
 
     type Fruit
         = Apple
         | Banana
         | Mango
 
-    enum : Enum Fruit
-    enum =
+    fruit : Enum Fruit
+    fruit =
         Enum.create
             [ ( "Apple", Apple )
             , ( "Banana", Banana )
@@ -84,7 +84,7 @@ create list =
     }
 
 
-{-| Create an `Enum` from an iterator function.
+{-| Create an `Enum` from an iterator function and a starting variant.
 It may look unusual, but the benefit is that the `case` statement helps ensure that you don't forget a variant.
 
     type Fruit
@@ -92,8 +92,8 @@ It may look unusual, but the benefit is that the `case` statement helps ensure t
         | Banana
         | Mango
 
-    enum : Enum Fruit
-    enum =
+    fruit : Enum Fruit
+    fruit =
         Enum.fromIterator
             (\a ->
                 case a of
@@ -114,7 +114,7 @@ fromIterator iterator start =
     create (iterate iterator start)
 
 
-{-| Enums based on `Int`s instead of `String`s
+{-| Enums based on `Int` instead of `String`
 -}
 type alias EnumInt a =
     { toInt : a -> Int
@@ -125,15 +125,15 @@ type alias EnumInt a =
     }
 
 
-{-| Create an `EnumInt` from a list of `Int`s and variants
+{-| Create an `EnumInt` from a list of `Int` and variants
 
     type Fruit
         = Apple
         | Banana
         | Mango
 
-    enum : EnumInt Fruit
-    enum =
+    fruit : EnumInt Fruit
+    fruit =
         Enum.createInt
             [ ( 1, Apple )
             , ( 2, Banana )
@@ -176,7 +176,7 @@ createInt list =
     }
 
 
-{-| Create an `EnumInt` from an iterator function
+{-| Create an `EnumInt` from an iterator function and a starting variant
 
     type Fruit
         = Apple
