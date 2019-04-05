@@ -13,7 +13,7 @@ module Enum exposing
 
 # Int-based Enums
 
-@docs EnumInt, createInt, fromIndex, fromIntIterator, fromIterator2
+@docs EnumInt, createInt, fromIntIterator
 
 -}
 
@@ -29,7 +29,6 @@ type alias Enum a =
     , fromString : String -> Maybe a
     , encode : a -> Value
     , decoder : Decoder a
-    , dict : Dict String a
     , list : List ( String, a )
     }
 
@@ -81,7 +80,6 @@ create list =
                         Nothing ->
                             Decode.fail ("Missing enum: " ++ string)
                 )
-    , dict = dict
     , list = list
     }
 
@@ -123,7 +121,6 @@ type alias EnumInt a =
     , fromInt : Int -> Maybe a
     , encode : a -> Value
     , decoder : Decoder a
-    , dict : Dict Int a
     , list : List ( Int, a )
     }
 
@@ -175,7 +172,6 @@ createInt list =
                         Nothing ->
                             Decode.fail ("Missing enum: " ++ String.fromInt int)
                 )
-    , dict = dict
     , list = list
     }
 
