@@ -38,11 +38,15 @@ encodeFruitList = Encode.list fruit.encode
 ```
 There is also `createInt` for enums based on `Int` instead of `String`
 
+## Code Generator
+Writing enum definitions can become tiring, especially if they change often.
+[This web based code generator](https://herteby.github.io/enum/generator) lets you just paste a list of names, and it will generate the type definition and `Enum.create` code for you!
+
 ## Enum.fromIterator
 
 One issue with enums is that when you add another variant, the compiler won't tell you if you forgot to update your `decoder` etc. to include it. The same goes for the list you provide to `Enum.create`.
 
-To solve this issue, this package includes an alternate way to create enums:
+To help with this, this package includes an alternate way to create enums:
 
 ```
 type Fruit
