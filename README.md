@@ -2,7 +2,7 @@
 
 When dealing with enums there are a handful of functions which you end up writing again and again. This package creates them all for you in one go.
 
-```
+```elm
 import Enum
 
 type Fruit
@@ -19,7 +19,7 @@ fruit =
         ]
 ```
 This gives you an `Enum` which is a record containing common helper functions:
-```
+```elm
 type alias Enum a =
     { toString : a -> String
     , fromString : String -> Maybe a
@@ -29,7 +29,7 @@ type alias Enum a =
     }
 ```
 Which you can then use like:
-```
+```elm
 fruitListDecoder : Decoder (List Fruit)
 fruitListDecoder = Decode.list fruit.decoder
 
@@ -48,7 +48,7 @@ One issue with enums is that when you add another variant, the compiler won't te
 
 To help with this, this package includes an alternate way to create enums:
 
-```
+```elm
 type Fruit
     = Apple
     | Banana
