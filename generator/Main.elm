@@ -5,28 +5,32 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import List.Extra as List
-import Regex
+import Regex exposing (Regex)
 import String.Extra as String
 
 
 type alias Model =
-    { text : String }
+    { name : String, variants : String }
 
 
 initialModel : Model
 initialModel =
-    { text = "Apple, Banana, Mango" }
+    { name = "Fruit", variants = "Apple Banana Mango" }
 
 
 type Msg
-    = Input String
+    = SetName String
+    | SetVariants String
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Input str ->
-            { model | text = str }
+        SetName str ->
+            { model | name = str }
+
+        SetVariants str ->
+            { model | variants = str }
 
 
 view : Model -> Html Msg
@@ -41,12 +45,17 @@ view model =
                 ]
             ]
         , div [ class "main" ]
-            [ h3 [] [ text "Enter a list of names" ]
-            , textarea [ onInput Input, value model.text, autofocus True ] []
+            [ h3 [] [ text "Enter a name for the type" ]
+            , input [ onInput SetName, value model.name, autofocus True ] []
+            , h3 [] [ text "Enter a list of variants ", small [] [ text "(all characters except alphanumerics and underscore count as separators)" ] ]
+            , textarea [ onInput SetVariants, value model.variants ] []
             , h3 [] [ text "Generated code" ]
-            , pre []
-                [ text (generate model.text)
-                ]
+            , case generate model of
+                Ok code ->
+                    pre [] [ text code ]
+
+                Err message ->
+                    pre [ class "error" ] [ text message ]
             , node "style" [] [ text css ]
             ]
         ]
@@ -61,33 +70,51 @@ main =
         }
 
 
-generate : String -> String
-generate str =
+generate : Model -> Result String String
+generate model =
     let
-        rgx =
-            Regex.fromString "[a-zA-Z0-9_]+" |> Maybe.withDefault Regex.never
-
         list =
-            Regex.find rgx str |> List.map .match
+            model.variants
+                |> Regex.find (rgx "[a-zA-Z0-9_]+")
+                |> List.map .match
 
         typedef =
-            "type Foo\n    = " ++ String.join "\n    | " (List.map String.toSentenceCase list)
+            "type " ++ String.toSentenceCase model.name ++ "\n    = " ++ String.join "\n    | " (List.map String.toSentenceCase list)
 
         tuples =
             list
-                |> List.map (\item -> "(\"" ++ item ++ "\", " ++ String.toSentenceCase item ++ ")")
+                |> List.map
+                    (\item -> "(\"" ++ item ++ "\", " ++ String.toSentenceCase item ++ ")")
                 |> String.join "\n        , "
     in
-    if list == [] then
-        "Please enter a list of names"
+    if model.name == "" then
+        Err "Please give a name for the type"
+
+    else if Regex.contains (rgx "[^a-zA-Z0-9_]") model.name then
+        Err "The name contains invalid characters"
+
+    else if not <| Regex.contains (rgx "^[a-zA-Z]") model.name then
+        Err "The name must start with a letter"
+
+    else if List.any (not << Regex.contains (rgx "^[a-zA-Z]")) list then
+        Err "Variant names must start with a letter"
+
+    else if list == [] then
+        Err "Please enter a list of variants"
 
     else if List.length (List.uniqueBy String.toSentenceCase list) /= List.length list then
-        "The names are not unique"
+        Err "The variants are not unique"
 
     else
-        typedef ++ "\n\n\n" ++ "enum : Enum Foo\nenum =\n    Enum.create\n        [ " ++ tuples ++ "\n        ]"
+        Ok <| typedef ++ "\n\n\n" ++ "enum : Enum " ++ String.toSentenceCase model.name ++ "\nenum =\n    Enum.create\n        [ " ++ tuples ++ "\n        ]"
 
 
+rgx : String -> Regex
+rgx =
+    Regex.fromString >> Maybe.withDefault Regex.never
+
+
+css : String
 css =
     """
 body {
@@ -98,7 +125,7 @@ h1,h2,h3,h4,h5,h6,h7{
   font-weight:normal;
 }
 .header {
-  background:#1293D8;
+  background:#5FABDC;
   color:white;
   padding: 1px;
 }
@@ -110,17 +137,25 @@ h1,h2,h3,h4,h5,h6,h7{
   margin:auto;
   padding:0 20px;
 }
-textarea{
+input, textarea{
   width:100%;
   box-sizing:border-box;
-  height:100px;
   border:1px solid lightgrey;
   padding:10px;
+}
+textarea {
+  height:100px;
   resize:none;
 }
 pre {
   border:1px solid lightgrey;
   padding:10px;
-  user-select:all;
+}
+.error{
+    color:red;
+    border-color:red;
+}
+small {
+  color:#888;
 }
 """
